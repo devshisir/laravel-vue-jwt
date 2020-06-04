@@ -1,0 +1,94 @@
+<template>
+    <div class="forny-form">
+        <div class="reset-form2">
+            <div v-if="linkStatus" class="reset-confirmation d-none d-block">
+                    <h4 class="mb-5">Link was sent</h4>
+                <div>
+                    Please, check your inbox for a password reset link.
+                </div> 
+            </div>
+            <form v-else @submit.prevent="sendPasswordLink" class="reset-password-form">
+                <h4 class="mb-5">Reset Your password</h4>
+                <p class="mb-10">
+                    Please enter your email address and we will send you a password password link.
+                </p>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" viewBox="0 0 24 16">
+                                    <g transform="translate(0)">
+                                        <path
+                                            d="M23.983,101.792a1.3,1.3,0,0,0-1.229-1.347h0l-21.525.032a1.169,1.169,0,0,0-.869.4,1.41,1.41,0,0,0-.359.954L.017,115.1a1.408,1.408,0,0,0,.361.953,1.169,1.169,0,0,0,.868.394h0l21.525-.032A1.3,1.3,0,0,0,24,115.062Zm-2.58,0L12,108.967,2.58,101.824Zm-5.427,8.525,5.577,4.745-19.124.029,5.611-4.774a.719.719,0,0,0,.109-.946.579.579,0,0,0-.862-.12L1.245,114.4,1.23,102.44l10.422,7.9a.57.57,0,0,0,.7,0l10.4-7.934.016,11.986-6.04-5.139a.579.579,0,0,0-.862.12A.719.719,0,0,0,15.977,110.321Z"
+                                            transform="translate(0 -100.445)"></path>
+                                    </g>
+                                </svg>
+                            </span>
+                        </div>
+                        <input class="form-control" v-model="email" name="email" type="email" placeholder="Email Address">
+                    </div>
+                    <div id="email_error" v-if="emailError">{{ emailError.email[0] }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button id="submit_resetlik" type="submit" class="btn btn-primary btn-block" v-bind:class="{ disabled: loading }">
+                             <span v-if="loading">
+                                <i class="fas fa-circle-notch fa-spin"></i> Sending email..
+                              </span>
+                            <span v-else>Send reset link</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-10">
+                    Remember password? 
+                    <router-link :to="{name: 'login'}">Login Now</router-link>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</template>
+
+<script>
+    export default {
+        data () {
+            return {
+                email: '',
+                emailError: '',
+                loading: false,
+                linkStatus : false,
+            }
+        },
+        methods:{
+            sendPasswordLink(){
+                this.emailError = ''
+                var self = this
+                this.loading = true
+                this.$store.dispatch('SendpasswordLik', {
+                    email: this.email,
+                })
+                .then(response =>{
+                    this.loading = false
+                    this.linkStatus = true
+                })
+                .catch(error =>{
+                    if(error.response.status == 422){
+                        this.emailError = error.response.data.errors
+                    }
+                    this.loading = false
+                    this.linkStatus = false
+                })
+            }
+        }
+    }
+</script>
+
+<style>
+    #email_error{
+        color: red;
+        margin-top: 8px;
+    }
+    #submit_resetlik.disabled{
+        pointer-events: none;
+    }
+</style>
